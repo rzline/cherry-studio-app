@@ -22,10 +22,8 @@ jobs:
           node-version: '20'
           cache: 'yarn'
 
-      # --- Add this step ---
-      - name: Enable Corepack
+      - name: Enable Corepack # 步骤 2.1：启用 Corepack
         run: corepack enable
-      # --- End of added step ---
 
       - name: Install dependencies
         run: yarn install --immutable # Now this will use Yarn 4.9.1 managed by Corepack
