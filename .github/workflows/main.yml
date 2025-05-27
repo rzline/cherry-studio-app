@@ -1,39 +1,55 @@
-name: Build, Test, and Export Web # Workflow name
+name: Build, Test, and Export Web
 
-on: # Define triggers
+on:
   push:
-    branches: [ main ] # On push to main branch
+    branches: [ main ]
   pull_request:
-    branches: [ main ] # On Pull Request targeting main branch
-  workflow_dispatch: # Allow manual trigger
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build-and-test: # Job ID
-    name: Build, Test & Export Web # Job name shown on GitHub
-    runs-on: ubuntu-latest # Runner environment
-    
+  build-and-test:
+    name: Build, Test & Export Web
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code # 步骤 1：检出代码
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js # 步骤 2：设置 Node.js 环境
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # 指定 Node.js 版本
-          # 保持 cache: 'yarn'，它会帮助 setup-node 识别并配置 Corepack
+          node-version: '20'
+          # 暂时保留缓存，看看是否有影响
           cache: 'yarn'
 
-      # --- 移除了手动 'corepack enable' 步骤 ---
+      # --- 诊断步骤 1 ---
+      - name: Check Yarn version (Before Corepack Enable)
+        run: |
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Yarn path: $(which yarn || echo 'yarn not found')"
+          echo "Yarn version: $(yarn --version || echo 'yarn not found')"
+          echo "Corepack version: $(corepack --version || echo 'corepack not found')"
 
-      # 添加一个检查步骤，看看 setup-node 后 yarn 版本是否正确
-      - name: Check Yarn version (after setup-node)
-        run: yarn --version
+      # --- 明确启用 Corepack ---
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Install dependencies # 步骤 3：安装依赖
-        # 这里的 yarn 应该由 setup-node 通过 Corepack 正确配置为 v4.9.1
-        run: yarn install --immutable
+      # --- 诊断步骤 2 ---
+      - name: Check Yarn version (After Corepack Enable)
+        run: |
+          echo "Yarn path: $(which yarn || echo 'yarn not found')"
+          echo "Yarn version: $(yarn --version || echo 'yarn not found')"
 
-      # ... 后续步骤 (lint, test, build, upload) 保持不变 ...
+      - name: Install dependencies
+        run: |
+          echo "Attempting yarn install..."
+          # 再检查一次版本，确保没变回去
+          yarn --version
+          yarn install --immutable
+
+      # --- 后续步骤保持不变 ---
       - name: Run Lint
         run: yarn lint
 
