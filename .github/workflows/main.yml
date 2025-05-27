@@ -11,7 +11,8 @@ jobs:
   build-and-test: # Job ID
     name: Build, Test & Export Web # Job name shown on GitHub
     runs-on: ubuntu-latest # Runner environment
-        steps:
+    
+    steps:
       - name: Checkout code # 步骤 1：检出代码
         uses: actions/checkout@v4
 
