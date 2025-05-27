@@ -1,3 +1,5 @@
+# .github/workflows/build.yml
+
 name: Build, Test, and Export Web
 
 on:
@@ -16,38 +18,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      # --- 修改这里 ---
+      - name: Setup Node.js (without Yarn cache)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # 暂时保留缓存，看看是否有影响
-          cache: 'yarn'
+          # 关键改动：移除了 cache: 'yarn' 选项
+      # --- 修改结束 ---
 
-      # --- 诊断步骤 1 ---
-      - name: Check Yarn version (Before Corepack Enable)
-        run: |
-          echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "Yarn path: $(which yarn || echo 'yarn not found')"
-          echo "Yarn version: $(yarn --version || echo 'yarn not found')"
-          echo "Corepack version: $(corepack --version || echo 'corepack not found')"
-
-      # --- 明确启用 Corepack ---
       - name: Enable Corepack
-        run: corepack enable
-
-      # --- 诊断步骤 2 ---
-      - name: Check Yarn version (After Corepack Enable)
-        run: |
-          echo "Yarn path: $(which yarn || echo 'yarn not found')"
-          echo "Yarn version: $(yarn --version || echo 'yarn not found')"
+        run: corepack enable # 确保 Corepack 被启用
 
       - name: Install dependencies
-        run: |
-          echo "Attempting yarn install..."
-          # 再检查一次版本，确保没变回去
-          yarn --version
-          yarn install --immutable
+        run: yarn install --immutable # 现在应该能正确使用 Yarn 4.9.1 了
 
       # --- 后续步骤保持不变 ---
       - name: Run Lint
