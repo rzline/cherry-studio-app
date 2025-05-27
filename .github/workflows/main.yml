@@ -11,36 +11,41 @@ jobs:
   build-and-test: # Job ID
     name: Build, Test & Export Web # Job name shown on GitHub
     runs-on: ubuntu-latest # Runner environment
-
+    
     steps:
-      - name: Checkout code # Step 1: Get the code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js # Step 2: Set up Node.js (required for Yarn and Expo)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Specify Node.js version (use LTS or your project's required version)
-          cache: 'yarn' # Enable caching for Yarn dependencies based on yarn.lock
+          node-version: '20'
+          cache: 'yarn'
 
-      - name: Install dependencies # Step 3: Install project dependencies using Yarn
-        run: yarn install --immutable # Use --immutable for strict lockfile checks in CI
+      # --- Add this step ---
+      - name: Enable Corepack
+        run: corepack enable
+      # --- End of added step ---
 
-      - name: Run Lint # Step 4: Run the linter
-        run: yarn lint # Executes the 'lint' script from package.json
+      - name: Install dependencies
+        run: yarn install --immutable # Now this will use Yarn 4.9.1 managed by Corepack
 
-      - name: Run Tests # Step 5: Run tests
-        run: yarn test --ci --watchAll=false # Executes 'test' script. --ci and --watchAll=false are common for CI environments.
+      - name: Run Lint
+        run: yarn lint
 
-      - name: Type Check # Step 6: Run TypeScript compiler to check types
-        run: yarn tsc --noEmit # Assumes 'tsc' command is available via typescript dependency
+      - name: Run Tests
+        run: yarn test --ci --watchAll=false
 
-      - name: Build Web App (Expo Export) # Step 7: Create static web build
-        run: npx expo export # Runs the Expo export command. Ensure expo-cli is accessible (usually via devDependencies)
-        # This command typically outputs to the 'dist/' directory by default.
+      - name: Type Check
+        run: yarn tsc --noEmit
 
-      - name: Upload Web Build Artifact # Step 8: Upload the build output
+      - name: Build Web App (Expo Export)
+        run: npx expo export
+
+      - name: Upload Web Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: web-build-output # Name of the artifact zip file
-          path: ./dist # Path to the directory created by 'expo export'. Verify this path if expo export outputs elsewhere.
-          if-no-files-found: error # Fail the workflow if the build output directory is not found
+          name: web-build-output
+          path: ./dist
+          if-no-files-found: error
+          
