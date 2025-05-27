@@ -11,23 +11,28 @@ jobs:
   build-and-test: # Job ID
     name: Build, Test & Export Web # Job name shown on GitHub
     runs-on: ubuntu-latest # Runner environment
-    
-    steps:
-      - name: Checkout code
+        steps:
+      - name: Checkout code # 步骤 1：检出代码
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js # 步骤 2：设置 Node.js 环境
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20' # 指定 Node.js 版本
+          # 保持 cache: 'yarn'，它会帮助 setup-node 识别并配置 Corepack
           cache: 'yarn'
 
-      - name: Enable Corepack # 步骤 2.1：启用 Corepack
-        run: corepack enable
+      # --- 移除了手动 'corepack enable' 步骤 ---
 
-      - name: Install dependencies
-        run: yarn install --immutable # Now this will use Yarn 4.9.1 managed by Corepack
+      # 添加一个检查步骤，看看 setup-node 后 yarn 版本是否正确
+      - name: Check Yarn version (after setup-node)
+        run: yarn --version
 
+      - name: Install dependencies # 步骤 3：安装依赖
+        # 这里的 yarn 应该由 setup-node 通过 Corepack 正确配置为 v4.9.1
+        run: yarn install --immutable
+
+      # ... 后续步骤 (lint, test, build, upload) 保持不变 ...
       - name: Run Lint
         run: yarn lint
 
@@ -46,4 +51,3 @@ jobs:
           name: web-build-output
           path: ./dist
           if-no-files-found: error
-          
