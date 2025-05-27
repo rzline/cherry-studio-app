@@ -30,7 +30,7 @@ jobs:
         run: corepack enable # 确保 Corepack 被启用
 
       - name: Install dependencies
-        run: yarn install --immutable # 现在应该能正确使用 Yarn 4.9.1 了
+        run: yarn install # 现在应该能正确使用 Yarn 4.9.1 了
 
       # --- 后续步骤保持不变 ---
       - name: Run Lint
